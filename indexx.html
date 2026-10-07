@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NTPC Digital Logbook — Universal Demo</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#172033;font-family:Arial,sans-serif}
+button,input,select{font:inherit}.top{height:64px;background:#12355b;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+.brand{font-size:19px;font-weight:700}.sub{font-size:11px;opacity:.75;margin-top:2px}.logout{border:0;border-radius:7px;padding:8px 12px;color:#12355b;font-weight:700}
+.nav{background:#fff;border-bottom:1px solid #dfe5ec;padding:9px 22px;display:flex;gap:6px}.nav button{border:0;background:transparent;padding:9px 12px;border-radius:7px;font-weight:700;color:#475467}.nav button.active,.nav button:hover{background:#eaf2ff;color:#1f6feb}
+main{max-width:1200px;margin:24px auto;padding:0 18px}.title{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}h1,h2,h3{margin:0}.muted{color:#667085;font-size:13px;margin-top:5px}.user{background:#eaf2ff;color:#1f6feb;padding:8px 10px;border-radius:7px;font-size:12px;font-weight:700}
+.card{background:#fff;border:1px solid #dfe5ec;border-radius:12px;padding:18px;margin-bottom:16px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}input,select{width:100%;padding:10px;border:1px solid #cfd6df;border-radius:7px;background:#fff}
+.btn{border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}.primary{background:#1f6feb;color:#fff}.secondary{background:#eef2f7;color:#344054}
+.kpi{background:#fff;border:1px solid #dfe5ec;border-radius:11px;padding:16px}.kpi small{color:#667085}.kpi strong{display:block;font-size:28px;margin:7px 0}.danger{color:#b42318}
+.eqgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.eq{border:1px solid #dfe5ec;border-radius:10px;padding:15px}.eqhead{display:flex;justify-content:space-between;align-items:start;margin-bottom:12px}
+.reading{display:grid;grid-template-columns:1.6fr 100px 85px;gap:8px;align-items:center;padding:9px 0;border-top:1px solid #edf0f4}.reading small{display:block;color:#98a2b3;margin-top:3px}
+.pill{display:inline-block;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:700}.green{color:#16803c;background:#e9f8ef}.red{color:#b42318;background:#feeceb}.yellow{color:#9a6700;background:#fff6d8}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:10px 8px;border-bottom:1px solid #edf0f4;text-align:left;white-space:nowrap}th{font-size:12px;color:#667085;background:#fafbfc}.badrow{background:#fff5f4}
+.empty{text-align:center;padding:28px;color:#667085}.actions{display:flex;gap:10px;align-items:center;margin-top:16px}.success{color:#16803c;font-weight:700}
+canvas{width:100%;height:330px;border:1px solid #edf0f4;border-radius:8px;margin-top:14px}.charthead{display:flex;justify-content:space-between;align-items:center}
+.login{max-width:430px;margin:80px auto}.login .card{padding:32px}.logo{display:inline-block;border:2px solid #12355b;color:#12355b;border-radius:7px;padding:5px 9px;font-weight:800;margin-bottom:15px}.login button{width:100%;margin-top:16px}
+@media(max-width:850px){.grid4,.grid3{grid-template-columns:1fr 1fr}.eqgrid{grid-template-columns:1fr}}@media(max-width:550px){.grid4,.grid3{grid-template-columns:1fr}.title{display:block}.user{display:inline-block;margin-top:10px}}
+
+.param-row{grid-template-columns:2fr 1fr 1fr 1fr 90px!important;display:grid!important}.param-row input{min-width:0}
+@media(max-width:700px){.param-row{grid-template-columns:1fr 1fr!important}.param-row button{grid-column:1/-1}}
+
+.unit-tabs{display:flex;gap:6px;background:#fff;border:1px solid #dfe5ec;border-radius:10px;padding:6px;margin-bottom:16px;overflow:auto}
+.unit-tab{border:0;background:transparent;padding:9px 14px;border-radius:7px;font-weight:700;color:#475467;white-space:nowrap;cursor:pointer}
+.unit-tab:hover,.unit-tab.active{background:#eaf2ff;color:#1f6feb}
+
+.footer-note{font-size:11px;color:#98a2b3;text-align:center;padding:24px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+@media(max-width:900px){.grid5{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.grid5{grid-template-columns:1fr}}
+.param-row{grid-template-columns:2fr 1fr 1fr 1fr 1fr 90px!important}
+@media(max-width:800px){.param-row{grid-template-columns:1fr 1fr!important}}
+
+.shift-note{font-size:12px;color:#667085;margin-top:4px}
+
+.operator-eq-grid{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.equipment-card{text-align:left;width:100%;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease;border:1px solid #dfe5ec}
+.equipment-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(16,24,40,.08)}
+.equipment-arrow{margin-top:14px;font-weight:700;color:#1f6feb}
+.reading-list{display:flex;flex-direction:column;gap:8px}
+.operator-reading{grid-template-columns:minmax(180px,1fr) 180px 100px}
+@media(max-width:700px){.operator-reading{grid-template-columns:1fr}.operator-reading input{width:100%}}
+.equipment-status-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0}.equipment-status-row label{font-size:12px;font-weight:700;color:#667085;margin:0}.equipment-status-row select{max-width:150px}.equipment-open{width:100%;margin-top:4px}.pill.orange{background:#fff4e5;color:#b54708}
+.equipment-status-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0}.equipment-status-row label{font-size:12px;font-weight:700;color:#667085;margin:0}.equipment-status-row select{max-width:150px}.equipment-open{width:100%;margin-top:6px}.pill.orange{background:#fff4e5;color:#b54708}
+
+.fatal{font-family:Arial,sans-serif;max-width:800px;margin:60px auto;padding:24px;background:#fff;border:1px solid #e4e7ec;border-radius:12px}.fatal pre{white-space:pre-wrap;background:#f2f4f7;padding:16px;border-radius:8px;overflow:auto}
+</style>
+</head>
+<body>
+<div id="app"><div style="font-family:Arial;padding:40px;text-align:center;color:#475467">Loading NTPC Digital Logbook…</div></div>
+
+<script>
+(function(){
+  window.__ntpcStarted = false;
+  window.addEventListener("error", function(e){
+    if(window.__ntpcStarted) return;
+    var app=document.getElementById("app");
+    if(app){
+      var msg=(e.error && e.error.stack) || e.message || "Unknown startup error";
+      app.innerHTML='<div class="fatal"><h1>NTPC Digital Logbook</h1><p>The application could not start.</p><pre>'+String(msg).replace(/</g,"&lt;")+'</pre><p>The project has been protected against older saved demo data. Refresh the page once if needed.</p></div>';
+    }
+  });
+})();
+</script>
+
+<script>
+
+const NTPCStore = (() => {
+  const memory = {};
+  let ls = null;
+  try {
+    if (window.localStorage) {
+      const testKey = "__ntpc_test__";
+      window.localStorage.setItem(testKey, "1");
+      window.localStorage.removeItem(testKey);
+      ls = window.localStorage;
+    }
+  } catch (e) {}
+  return {
+    get(key) {
+      try { return ls ? ls.getItem(key) : (memory[key] ?? null); }
+      catch (e) { return memory[key] ?? null; }
+    },
+    set(key, value) {
+      memory[key] = String(value);
+      try { if (ls) ls.setItem(key, String(value)); } catch (e) {}
+    },
+    remove(key) {
+      delete memory[key];
+      try { if (ls) ls.removeItem(key); } catch (e) {}
+    }
+  };
+})();
+
+const DB="ntpc_logbook_manual_v1";
+const N=(name,unit,min,max)=>[name,unit,min,max,"number"];
+const T=(name,unit="")=>[name,unit,null,null,"text"];
+const pair=(base,unit,min,max)=>[N(base+" DE",unit,min,max),N(base+" NDE",unit,min,max)];
+const catalog=[
+/* UNIT 3 — BOILER O'METER */
+{id:"idfan-a",unit:"Unit 3",dept:"Boiler O'Meter",name:"ID Fan A",params:[...pair("Fan Bearing Temperature","°C",20,85),...pair("Motor Bearing Temperature","°C",20,85),N("Motor Cold/Hot Air Temperature","°C",20,80),T("LO Pump In Service / Standby"),N("LO Pressure","KSC",0.5,2),T("LO Filter / Cooler In Service"),N("LO Temperature After Cooler","°C",20,65),N("LO Pressure After Filter","KSC",0,2),N("DP Across Filter","KSC",0,1),N("IGV Position","%",0,100),N("ID Fan Speed","rpm",0,1500),N("Lube Oil Tank Level","%",20,100),T("Return Oil Flow")]},
+{id:"idfan-b",unit:"Unit 3",dept:"Boiler O'Meter",name:"ID Fan B",params:[...pair("Fan Bearing Temperature","°C",20,85),...pair("Motor Bearing Temperature","°C",20,85),N("Motor Cold/Hot Air Temperature","°C",20,80),T("LO Pump In Service / Standby"),N("LO Pressure","KSC",0.5,2),T("LO Filter / Cooler In Service"),N("LO Temperature After Cooler","°C",20,65),N("LO Pressure After Filter","KSC",0,2),N("DP Across Filter","KSC",0,1),N("IGV Position","%",0,100),N("ID Fan Speed","rpm",0,1500),N("Lube Oil Tank Level","%",20,100),T("Return Oil Flow")]},
+{id:"seal-air",unit:"Unit 3",dept:"Boiler O'Meter",name:"Seal Air Fans",params:[T("Fan In Service / Standby"),N("Oil Level","%",20,100),N("Disc Damper Position","%",0,100),N("Bearing Temperature","°C",20,85),N("Discharge Pressure","mmwc",0,500)]},
+{id:"fd-a",unit:"Unit 3",dept:"Boiler O'Meter",name:"FD Fan A",params:[...pair("Fan Bearing Temperature","°C",20,85),...pair("Motor Bearing Temperature","°C",20,85),T("LO Pump In Service / Standby"),N("LO Pressure","KSC",0.5,2),T("LO Filter / Cooler In Service"),N("Oil Temperature After Cooler","°C",20,65),N("DP Across Filter","KSC",0,1),N("LO/CO Pressure After Filter","KSC",0,4),N("Oil Tank Level","%",20,100),T("Return Oil Flow"),N("Blade Pitch Position","%",0,100),N("Disc Damper Position","%",0,100)]},
+{id:"fd-b",unit:"Unit 3",dept:"Boiler O'Meter",name:"FD Fan B",params:[...pair("Fan Bearing Temperature","°C",20,85),...pair("Motor Bearing Temperature","°C",20,85),T("LO Pump In Service / Standby"),N("LO Pressure","KSC",0.5,2),T("LO Filter / Cooler In Service"),N("Oil Temperature After Cooler","°C",20,65),N("DP Across Filter","KSC",0,1),N("LO/CO Pressure After Filter","KSC",0,4),N("Oil Tank Level","%",20,100),T("Return Oil Flow"),N("Blade Pitch Position","%",0,100),N("Disc Damper Position","%",0,100)]},
+{id:"pa-a",unit:"Unit 3",dept:"Boiler O'Meter",name:"PA Fan A",params:[...pair("Fan Bearing Temperature","°C",20,85),...pair("Motor Bearing Temperature","°C",20,85),T("LO Pump In Service / Standby"),N("LO Pressure","KSC",0.5,2),T("LO Filter / Cooler In Service"),N("Oil Temperature After Cooler","°C",20,65),N("DP Across Filter","KSC",0,1),N("LO/CO Pressure After Filter","KSC",0,12),N("Oil Tank Level","%",20,100),T("Return Oil Flow"),N("Blade Pitch Position","%",0,100),N("Disc Damper Position","%",0,100),T("APH Air Vessel Draining")]},
+{id:"pa-b",unit:"Unit 3",dept:"Boiler O'Meter",name:"PA Fan B",params:[...pair("Fan Bearing Temperature","°C",20,85),...pair("Motor Bearing Temperature","°C",20,85),T("LO Pump In Service / Standby"),N("LO Pressure","KSC",0.5,2),T("LO Filter / Cooler In Service"),N("Oil Temperature After Cooler","°C",20,65),N("DP Across Filter","KSC",0,1),N("LO/CO Pressure After Filter","KSC",0,12),N("Oil Tank Level","%",20,100),T("Return Oil Flow"),N("Blade Pitch Position","%",0,100),N("Disc Damper Position","%",0,100),T("APH Air Vessel Draining")]},
+{id:"mill-c",unit:"Unit 3",dept:"Boiler O'Meter",name:"Mill C",params:[T("Mill In Service / Standby"),...pair("Motor Bearing Temperature","°C",20,85),T("LO Pump In Service / Standby"),N("LO Pressure","KSC",0.5,4),T("LO Filter In Service"),N("LO Temperature After Filter","°C",20,70),N("LO Pressure After Filter","KSC",0,4),N("DP Across Filter","KSC",0,1),N("Lube Oil Level","%",20,100),T("Rejection")]},
+{id:"mill-d",unit:"Unit 3",dept:"Boiler O'Meter",name:"Mill D",params:[T("Mill In Service / Standby"),...pair("Motor Bearing Temperature","°C",20,85),T("LO Pump In Service / Standby"),N("LO Pressure","KSC",0.5,4),T("LO Filter In Service"),N("LO Temperature After Filter","°C",20,70),N("LO Pressure After Filter","KSC",0,4),N("DP Across Filter","KSC",0,1),N("Lube Oil Level","%",20,100),T("Rejection")]},
+{id:"mill-e",unit:"Unit 3",dept:"Boiler O'Meter",name:"Mill E",params:[T("Mill In Service / Standby"),...pair("Motor Bearing Temperature","°C",20,85),T("LO Pump In Service / Standby"),N("LO Pressure","KSC",0.5,4),T("LO Filter In Service"),N("LO Temperature After Filter","°C",20,70),N("LO Pressure After Filter","KSC",0,4),N("DP Across Filter","KSC",0,1),N("Lube Oil Level","%",20,100),T("Rejection")]},
+{id:"mill-f",unit:"Unit 3",dept:"Boiler O'Meter",name:"Mill F",params:[T("Mill In Service / Standby"),...pair("Motor Bearing Temperature","°C",20,85),T("LO Pump In Service / Standby"),N("LO Pressure","KSC",0.5,4),T("LO Filter In Service"),N("LO Temperature After Filter","°C",20,70),N("LO Pressure After Filter","KSC",0,4),N("DP Across Filter","KSC",0,1),N("Lube Oil Level","%",20,100),T("Rejection")]},
+{id:"mill-rejects",unit:"Unit 3",dept:"Boiler O'Meter",name:"Mill Rejects Handling System",params:[T("Mill D/D/E/F Rejection"),T("MRS B/D/E/F Auto Mode"),T("APH Hopper 1/3 Status"),T("APH Hopper 2/4 Ash"),T("Eco Hopper Discharge Line") ]},
+{id:"boiler-notes",unit:"Unit 3",dept:"Boiler O'Meter",name:"Boiler O'Meter Observations",params:[T("Major Leakage — Coal / Water / Steam"),T("Safety Hazard / Abnormal Sound"),T("Lighting Deficiency")]},
+/* UNIT 2 — TURBINE */
+{id:"bfp-a",unit:"Unit 2",dept:"Turbine",name:"Boiler Feed Pump A",params:[T("BFP In Service / Standby / Under Permit"),N("Suction Strainer DP","KSC",0,10),N("Booster Pump Suction Pressure","KSC",10,20),N("Balancing Leak-off Pressure","KSC",10,25),N("Main Pump Suction Pressure","KSC",10,25),N("Oil Level","%",20,100),T("Lube Oil Filter In Service"),N("Lube Oil Filter Differential Pressure","KSC",0,1),T("Lube Oil Cooler In Service"),N("Lube Oil Pressure","KSC",0.8,2.5),T("Return Oil Flow in Bearings"),N("Lube Oil Cooler Inlet Temperature","°C",20,70),N("Lube Oil Cooler Outlet Temperature","°C",20,60),T("Working Oil Cooler In Service"),N("Working Oil Pressure","KSC",0.5,3),N("Working Oil Cooler Inlet Temperature","°C",20,70),N("Working Oil Cooler Outlet Temperature","°C",20,60),N("Max Hydraulic Coupling Bearing Temperature","°C",20,90),N("Main Pump Bearing DE","°C",20,90),N("Main Pump Bearing NDE","°C",20,90),N("BP Bearing DE","°C",20,90),N("BP Bearing NDE","°C",20,90),N("Scoop Position","%",0,100),N("Main Pump Seal Water DE","°C",20,70),N("Main Pump Seal Water NDE","°C",20,70),T("BP Seal Water Temperature High / Normal"),T("Motor Bearing Temperature"),T("Leakages Noticed")]},
+{id:"bfp-b",unit:"Unit 2",dept:"Turbine",name:"Boiler Feed Pump B",params:[T("BFP In Service / Standby / Under Permit"),N("Suction Strainer DP","KSC",0,10),N("Booster Pump Suction Pressure","KSC",10,20),N("Balancing Leak-off Pressure","KSC",10,25),N("Main Pump Suction Pressure","KSC",10,25),N("Oil Level","%",20,100),T("Lube Oil Filter In Service"),N("Lube Oil Filter Differential Pressure","KSC",0,1),T("Lube Oil Cooler In Service"),N("Lube Oil Pressure","KSC",0.8,2.5),T("Return Oil Flow in Bearings"),N("Lube Oil Cooler Inlet Temperature","°C",20,70),N("Lube Oil Cooler Outlet Temperature","°C",20,60),T("Working Oil Cooler In Service"),N("Working Oil Pressure","KSC",0.5,3),N("Working Oil Cooler Inlet Temperature","°C",20,70),N("Working Oil Cooler Outlet Temperature","°C",20,60),N("Max Hydraulic Coupling Bearing Temperature","°C",20,90),N("Main Pump Bearing DE","°C",20,90),N("Main Pump Bearing NDE","°C",20,90),N("BP Bearing DE","°C",20,90),N("BP Bearing NDE","°C",20,90),N("Scoop Position","%",0,100),N("Main Pump Seal Water DE","°C",20,70),N("Main Pump Seal Water NDE","°C",20,70),T("BP Seal Water Temperature High / Normal"),T("Motor Bearing Temperature"),T("Leakages Noticed")]},
+{id:"ecw",unit:"Unit 2",dept:"Turbine",name:"ECW SG / TG & ACW System",params:[T("ECW SG Pump In Service / Standby / Under Permit"),N("Suction / Discharge Pressure","KSC",0,10),N("ECW SG Header Pressure","KSC",0,10),T("PHE YS-I/L & O/L Temperature"),T("ECW TG Pump In Service / Standby / Under Permit"),N("ECW TG Pump Suction / Discharge Pressure","KSC",0,10),N("ECW TG Header Pressure","KSC",0,10),T("PHE TS-I/L & O/L Temperature"),T("ACW Pump In Service / Standby / Under Permit"),N("ACWBP Suction / Discharge Pressure","KSC",0,30),N("ACW Filter DP","KSC",0,5)]},
+{id:"vacuum",unit:"Unit 2",dept:"Turbine",name:"Vacuum System",params:[T("Pump In Service"),N("Seal Water Flow","LPM",0,30000),N("Seal Water Temperature","°C",20,70),N("Separator Water Tank Level","mm",0,1000),N("Vacuum at Pump Suction","mmwc",-1000,1000),T("Bearing Temperature Normal / High")]},
+{id:"seal-oil",unit:"Unit 2",dept:"Turbine",name:"Seal Oil System",params:[T("SOP In Service / Standby"),N("Seal Oil Tank Level","mm",0,500),T("Seal Oil Cooler / Filter In Service A/B"),N("Filter Clogging","%",0,100),N("Seal Oil Temperature After Cooler","°C",20,70),T("Seal Oil Vacuum Pump H/S & Vacuum"),T("Vacuum Pump Suction / Discharge Drain Pots"),T("Draining of Pots Near CEP"),N("Seal Oil / H2 DP / H2 Pressure","KSC",0,30),N("Seal Oil Pressure TE / EE","KSC",0,30),N("H2 Cylinder Full","%",0,100),N("H2 Dryer Dew Point","°C",-50,20),T("H2 Purity"),T("Leakages If Any")]},
+{id:"cep",unit:"Unit 2",dept:"Turbine",name:"Condensate Extraction Pump (CEP)",params:[T("CEP In Service / Standby / Under Permit"),N("Thrust Bearing Oil Level","%",20,100),N("Thrust Bearing Temperature","°C",20,90),N("Motor Bearing TOP / BOTTOM","°C",20,90),N("CEP Discharge Pressure","KSC",0,30),N("Suction Strainer DP","KSC",0,10),N("Gland Seal Water Pressure","KSC",0,10),N("Thrust Bearing CW Inlet Pressure","KSC",0,10),N("Thrust Bearing CW Inlet Temperature","°C",20,60),N("Thrust Bearing CW Outlet Pressure","KSC",0,10),N("Thrust Bearing CW Outlet Temperature","°C",20,70)]},
+{id:"turbine-oil",unit:"Unit 2",dept:"Turbine",name:"Turbine Oil System",params:[N("MOT Level","mm",0,500),T("Lube Oil Cooler In Service"),T("Duplex Filter In Service / Choke / A/V"),N("Oil Pressure Before / After Cooler","KSC",0,10),N("Lube Oil Temperature Before / After Cooler","°C",20,70),T("MOT Vapor Exhauster In Service"),T("Oil Leakages Noticed"),N("Dirty Oil Tank Level","%",0,100),N("Leakage Oil Tank Level","%",0,100),N("CW Inlet / Outlet Pressure","KSC",0,10),N("CW DP","KSC",0,10),N("CW Inlet / Outlet Temperature","°C",20,60),T("CW PIT / ED Status"),T("GSC Exhaust Fan In Service"),T("SOST Vapor Exhaust Fan In Service")]},
+{id:"hp-bypass",unit:"Unit 2",dept:"Turbine",name:"HP Bypass Oil Unit",params:[T("Oil Level Normal / Low"),N("Accumulator Oil Pressure A","KSC",0,250),N("Accumulator Oil Pressure B","KSC",0,250),N("Line Oil Pressure A","KSC",0,200),N("Line Oil Pressure B","KSC",0,200),T("LP Bypass Oil"),T("CFP / CFCP In Service"),N("Oil Level / Oil Pressure","%",0,100),N("Oil Temperature","°C",20,70)]},
+{id:"turbine-remarks",unit:"Unit 2",dept:"Turbine",name:"Turbine Remarks",params:[T("Centrifuge Running Hours"),T("Hydrogen Cylinder Consumed"),T("Major Leakages"),T("Safety Hazards Noticed"),T("Lighting Defects"),T("MAL Drains / HP&LP Flash Tank Drain Check")]},
+/* UNIT 1 — FIRING FLOOR */
+{id:"aph-a",unit:"Unit 1",dept:"Firing Floor",name:"Air Preheater A",params:[N("GB Oil Level","%",20,100),N("Air Motor Lube Oil Level","%",20,100),N("Air Motor Pressure","KSC",4,9),T("GB LOP In Service"),N("Oil Level","%",20,100),N("Pump Discharge Pressure","KSC",1,5),N("Oil Temperature","°C",20,70),N("Oil Flow","LPM",0,50),N("CW Inlet / Outlet Temperature","°C",20,70),T("SB LOP In Service"),N("SB Oil Level","%",20,100),N("SB Pump Discharge Pressure","KSC",1,5),N("SB Oil Temperature","°C",20,70),N("SB Oil Flow","LPM",0,50),N("SB CW Inlet / Outlet Temperature","°C",20,70)]},
+{id:"aph-b",unit:"Unit 1",dept:"Firing Floor",name:"Air Preheater B",params:[N("GB Oil Level","%",20,100),N("Air Motor Lube Oil Level","%",20,100),N("Air Motor Pressure","KSC",4,9),T("GB LOP In Service"),N("Oil Level","%",20,100),N("Pump Discharge Pressure","KSC",1,5),N("Oil Temperature","°C",20,70),N("Oil Flow","LPM",0,50),N("CW Inlet / Outlet Temperature","°C",20,70),T("SB LOP In Service"),N("SB Oil Level","%",20,100),N("SB Pump Discharge Pressure","KSC",1,5),N("SB Oil Temperature","°C",20,70),N("SB Oil Flow","LPM",0,50),N("SB CW Inlet / Outlet Temperature","°C",20,70)]},
+{id:"fuel-oil",unit:"Unit 1",dept:"Firing Floor",name:"Fuel Oil / HFO System",params:[N("Atomizing Air Pressure","KSC",0,15),N("LDO Flow Meter Reading","L",0,100000),N("HFO Pressure / Temperature","KSC",0,20),N("HFO Flow Meter Reading","L",0,100000),N("Atomizing Steam Pressure","KSC",0,20),T("HFO Filter DP"),T("DC Scanner Fan Status"),N("Scanner Fan Discharge Pressure","mmwc",0,1000),T("AB Elevation Oil Guns Status"),T("CD Elevation Oil Guns Status"),T("EF Elevation Oil Guns Status"),T("FG Elevation Oil Guns Status"),T("CBD Opening"),T("FRS In Service"),T("Hydra Step Status"),N("Drum Pressure","KSC",0,200),T("Major Boiler Area Leakage")]},
+{id:"feeder-floor",unit:"Unit 1",dept:"Firing Floor",name:"Feeder Floor / Coal Handling",params:[T("Oil Level in Feeder Gear Box"),T("Coal Leakages in Feeder Floor & Boiler Area"),T("Economizer Hopper Status"),N("Ammonia Tank Level","%",0,100),T("Ammonia Dosing Pump In Service"),N("Discharge Pressure","KSC",0,30),T("Aux PRDS Charged From"),T("Leakages in APRDS / Deaerator Floor"),T("Clinker Grinder In Service"),T("BA Transfer Pumps In Service"),T("Trough Seal Status"),T("APH Hopper Status")]},
+{id:"firing-observations",unit:"Unit 1",dept:"Firing Floor",name:"Firing Floor Observations",params:[T("Safety Hazards"),T("Lighting Deficiency"),T("Major Defects"),T("Major Leakages in Boiler Area"),T("COC Running / Oil Level"),T("BIW All Corner Open"),T("Feeder Gear Box Oil Level"),T("Drum Floor Hydrant Pressure"),T("Reheater Spray Manual Valve")]}
+];
+
+// The same plant sections exist for each generating unit in the digital prototype.
+// The photographed pages show examples from Units 1/2/3; we make the templates available
+// to every unit so the engineer can configure the exact unit equipment later.
+const baseCatalog=catalog.map(e=>({...e}));
+const bfpBTemplate=baseCatalog.find(e=>e.id==="bfp-b");
+if(bfpBTemplate) baseCatalog.push({...bfpBTemplate,id:"bfp-c",name:"Boiler Feed Pump C",params:bfpBTemplate.params.map(p=>[...p])});
+catalog.length=0;
+["Unit 1","Unit 2","Unit 3"].forEach(unit=>{
+  baseCatalog.forEach(e=>{
+    const id=e.id+"-"+unit.replace("Unit ","u");
+    if(!catalog.some(x=>x.id===id)) catalog.push({...e,id,unit,params:e.params.map(p=>[...p])});
+  });
+});
+
+function getDB(){
+ let d=null;
+ try { d=JSON.parse(NTPCStore.get(DB)||"null"); } catch(e) { d=null; }
+ if(d && !Array.isArray(d.records)) d.records=[];
+ if(d && !Array.isArray(d.catalog)) d.catalog=catalog.map(x=>({...x,params:x.params.map(p=>[...p])}));
+ if(d)return d;
+ d={records:[],catalog:catalog};
+ const demo=[
+ ["22 Sep","C","bfp-a","Main Pump Bearing DE",64],
+ ["23 Sep","A","bfp-a","Main Pump Bearing DE",72],
+ ["23 Sep","B","bfp-a","Main Pump Bearing DE",78],
+ ["23 Sep","C","bfp-a","Main Pump Bearing DE",82],
+ ["24 Sep","A","bfp-a","Main Pump Bearing DE",86],
+ ["24 Sep","C","bfp-a","Main Pump Bearing DE",92],
+ ["24 Sep","C","aph-a","Oil Flow",25],
+ ["24 Sep","C","idfan-a","Fan Bearing Temperature DE",62]
+ ];
+ demo.forEach((x,i)=>d.records.push({id:"demo"+i,date:x[0],shift:x[1],equipmentId:x[2],parameter:x[3],value:x[4],status:"In Service",operator:"Demo Operator"}));
+ NTPCStore.set(DB,JSON.stringify(d));return d;
+}
+function saveDB(d){NTPCStore.set(DB,JSON.stringify(d))}
+function currentUser(){
+ try{return JSON.parse(NTPCStore.get("ntpc_user")||"null")}
+ catch(e){return null}
+}
+
+
+function shiftLabel(s){
+ if(s==="A") return "A (07:00–14:00)";
+ if(s==="B") return "B (14:00–22:00)";
+ if(s==="C") return "C (22:00–07:00)";
+ return s||"";
+}
+
+function getCatalog(){
+ const d=getDB();
+ return d.catalog || catalog;
+}
+function saveCatalog(c){
+ const d=getDB(); d.catalog=c; saveDB(d);
+}
+function equipmentSetup(){
+ const c=getCatalog();
+ document.getElementById("app").innerHTML=shell(`<div class="title"><div><h1>Equipment Setup</h1><p class="muted">Engineer can add or edit equipment and operating limits.</p></div><button class="btn primary" onclick="addEquipment()">+ Add Equipment</button></div>
+ <section class="card"><div class="table-wrap"><table><thead><tr><th>Unit</th><th>Department</th><th>Equipment</th><th>Parameters</th><th>Status</th><th>Action</th></tr></thead><tbody id="eqSetupRows"></tbody></table></div></section>
+ <section class="card"><h2>How it works</h2><p class="muted">New equipment becomes available to operators immediately. Editing limits changes future readings; existing shift records are not changed.</p></section>`,"setup");
+ renderEquipmentSetup();
+}
+function renderEquipmentSetup(){
+ const c=getCatalog();
+ eqSetupRows.innerHTML=c.map(e=>`<tr><td>${e?.unit||"—"}</td><td>${e?.dept||"—"}</td><td><b>${e?.name||r.equipmentId}</b></td><td>${e.params.length}</td><td><span class="pill green">Active</span></td><td><button class="btn secondary" onclick="editEquipment('${e.id}')">Edit</button></td></tr>`).join("");
+}
+function addEquipment(){
+ const c=getCatalog(),id="eq-"+Date.now();
+ equipmentEditor({id,unit:"Unit 1",dept:"Turbine",name:"New Equipment",params:[]},true);
+}
+function editEquipment(id){
+ const e=getCatalog().find(x=>x.id===id);
+ if(e) equipmentEditor(JSON.parse(JSON.stringify(e)),false);
+}
+function equipmentEditor(e,isNew){
+ document.getElementById("app").innerHTML=shell(`<div class="title"><div><h1>${isNew?"Add Equipment":"Edit Equipment"}</h1><p class="muted">Configure the equipment used in the operator logbook.</p></div></div>
+ <section class="card"><div class="grid3">
+ <div><label>Unit</label><select id="edUnit">${["Unit 1","Unit 2","Unit 3"].map(x=>`<option ${e.unit===x?"selected":""}>${x}</option>`).join("")}</select></div>
+ <div><label>Department</label><select id="edDept">${["Turbine","Boiler O'Meter","Firing Floor"].map(x=>`<option ${e.dept===x?"selected":""}>${x}</option>`).join("")}</select></div>
+ <div><label>Equipment Name</label><input id="edName" value="${e?.name||r.equipmentId}"></div></div></section>
+ <section class="card"><div class="title"><div><h2>Parameters</h2><p class="muted">Set the normal operating range used for automatic red alerts.</p></div><button class="btn secondary" onclick="addParameterRow()">+ Add Parameter</button></div>
+ <div id="paramRows"></div></section>
+ <div class="actions"><button class="btn primary" onclick="saveEquipment('${e.id}',${isNew})">Save Equipment</button><button class="btn secondary" onclick="equipmentSetup()">Cancel</button><span id="editMsg" class="success"></span></div>`,"setup");
+ window.editingEquipment=e; renderParameterRows();
+}
+function renderParameterRows(){
+ const rows=window.editingEquipment.params;
+ paramRows.innerHTML=rows.map((p,i)=>`<div class="reading param-row">
+ <input class="pn" value="${p[0]}" placeholder="Parameter name">
+ <input class="pu" value="${p[1]}" placeholder="Unit">
+ <select class="ptype" onchange="toggleParamLimits(this)"><option value="number" ${(p[4]||"number")==="number"?"selected":""}>Numeric</option><option value="text" ${p[4]==="text"?"selected":""}>Status/Text</option></select>
+ <input class="pmin" type="number" step="any" value="${p[2]??""}" placeholder="Min" ${p[4]==="text"?"disabled":""}>
+ <input class="pmax" type="number" step="any" value="${p[3]??""}" placeholder="Max" ${p[4]==="text"?"disabled":""}>
+ <button class="btn secondary" onclick="removeParameterRow(${i})">Remove</button>
+ </div>`).join("") || `<p class="muted">No parameters yet. Add at least one parameter.</p>`;
+}
+function toggleParamLimits(sel){const r=sel.parentElement, num=sel.value!=="text";r.querySelector(".pmin").disabled=!num;r.querySelector(".pmax").disabled=!num;}
+function addParameterRow(){
+ window.editingEquipment.params.push(["New Parameter","",0,100,"number"]);renderParameterRows();
+}
+function removeParameterRow(i){
+ window.editingEquipment.params.splice(i,1);renderParameterRows();
+}
+function saveEquipment(id,isNew){
+ const name=edName.value.trim();
+ if(!name){alert("Enter an equipment name.");return}
+ const rows=[...document.querySelectorAll(".param-row")];
+ const params=rows.map(r=>{const type=r.querySelector(".ptype").value;return [r.querySelector(".pn").value.trim(),r.querySelector(".pu").value.trim(),type==="number"?Number(r.querySelector(".pmin").value):null,type==="number"?Number(r.querySelector(".pmax").value):null,type]}).filter(p=>p[0]);
+ const e={id,unit:edUnit.value,dept:edDept.value,name,params};
+ const c=getCatalog(),idx=c.findIndex(x=>x.id===id);
+ if(idx>=0)c[idx]=e;else c.push(e);
+ saveCatalog(c);equipmentSetup();
+}
+function login(){
+ const n=document.getElementById("name").value.trim(),r=document.getElementById("role").value;
+ if(!n){document.getElementById("msg").textContent="Please enter your name.";return}
+ NTPCStore.set("ntpc_user",JSON.stringify({name:n,role:r}));
+ r==="operator"?operator():dashboard();
+}
+function logout(){NTPCStore.remove("ntpc_user");renderLogin()}
+function shell(content,active){
+ const u=currentUser();
+ return `<header class="top"><div><div class="brand">NTPC Digital Logbook</div><div class="sub">Bongaigaon Thermal Power Plant</div></div><button class="logout" onclick="logout()">Logout</button></header>
+ <nav class="nav">${u?.role==="operator"?`<button class="${active==="operator"?"active":""}" onclick="operator()">Shift Entry</button>`:`<button class="${active==="dashboard"?"active":""}" onclick="dashboard()">All Units</button><button class="${active==="unit1"?"active":""}" onclick="unitWorkspace('Unit 1')">Unit 1</button><button class="${active==="unit2"?"active":""}" onclick="unitWorkspace('Unit 2')">Unit 2</button><button class="${active==="unit3"?"active":""}" onclick="unitWorkspace('Unit 3')">Unit 3</button>`}</nav>
+ <main>${content}</main>`
+}
+function renderLogin(){
+ document.getElementById("app").innerHTML=`<main class="login"><section class="card"><div class="logo">NTPC</div><h1>Digital Logbook</h1><p class="muted">Simple operator and engineer demonstration</p>
+ <label>Name</label><input id="name" placeholder="Enter your name"><label>Login as</label><select id="role"><option value="operator">Operator</option><option value="engineer">Engineer</option></select><button class="btn primary" onclick="login()">Login</button><p id="msg" class="muted"></p></section></main>`
+}
+function operator(){
+ const u=currentUser();
+ const cc=getCatalog(); const units=[...new Set(cc.map(x=>x.unit))],depts=[...new Set(cc.map(x=>x.dept))];
+ document.getElementById("app").innerHTML=shell(`<div class="title"><div><h1>Operator Shift Entry</h1><p class="muted">Enter readings for the selected duty shift and checkpoint.</p></div><div class="user">Operator: ${u?.name||"Demo"}</div></div>
+ <section class="card"><div class="grid5"><div><label>Unit</label><select id="opUnit" onchange="renderOpEq()">${["Unit 1","Unit 2","Unit 3"].map(x=>`<option>${x}</option>`).join("")}</select></div>
+ <div><label>Department</label><select id="opDept" onchange="renderOpEq()">${depts.map(x=>`<option>${x}</option>`).join("")}</select></div>
+ <div><label>Shift</label><select id="opShift"><option value="A">A — 07:00 AM to 02:00 PM</option><option value="B">B — 02:00 PM to 10:00 PM</option><option value="C">C — 10:00 PM to 07:00 AM</option></select></div>
+ <div><label>Log Point</label><select id="opPoint"><option>Shift Start</option><option>Shift Mid</option><option>Shift End</option></select></div>
+ </div></section>
+ <div id="opEq"></div>`,"operator");
+ document.getElementById("opUnit").value="Unit 2";document.getElementById("opDept").value="Turbine";renderOpEq();
+}
+function operatorStatusKey(eid){
+ const date=new Date().toISOString().slice(0,10),shift=document.getElementById("opShift").value;
+ return `${date}|${shift}|${eid}`;
+}
+function getOperatorStatus(eid){
+ const d=getDB();return (d.equipmentStatus&&d.equipmentStatus[operatorStatusKey(eid)])||"In Service";
+}
+function setOperatorStatus(eid,status){
+ const d=getDB();d.equipmentStatus=d.equipmentStatus||{};d.equipmentStatus[operatorStatusKey(eid)]=status;saveDB(d);renderOpEq();
+}
+function renderOpEq(){
+ const u=document.getElementById("opUnit").value,d=document.getElementById("opDept").value,list=getCatalog().filter(x=>x.unit===u&&x.dept===d);
+ document.getElementById("opEq").innerHTML=list.length?`<section class="card"><div class="title"><div><h2>Select Equipment</h2><p class="muted">Set the status for each equipment here, then open it to enter readings.</p></div></div><div class="eqgrid operator-eq-grid">${list.map(e=>{const st=getOperatorStatus(e.id);return `<div class="eq equipment-card"><div class="eqhead"><div><h2>${e?.name||r.equipmentId}</h2><div class="muted">${u} · ${d}</div></div><span class="pill ${st==="Permit"?"red":st==="Standby"?"orange":"green"}">${st}</span></div><div class="equipment-status-row"><label>Equipment Status</label><select onchange="setOperatorStatus('${e.id}',this.value)"><option ${st==="In Service"?"selected":""}>In Service</option><option ${st==="Standby"?"selected":""}>Standby</option><option ${st==="Permit"?"selected":""}>Permit</option></select></div><div class="muted">${e.params.length} parameters</div><button class="btn primary equipment-open" onclick="openOperatorEquipment('${e.id}')">Enter readings →</button></div>`}).join("")}</div></section>`:`<section class="card empty">No equipment template for this Unit/Department yet.</section>`;
+}
+function openOperatorEquipment(id){
+ const e=getCatalog().find(x=>x.id===id),u=document.getElementById("opUnit").value,d=document.getElementById("opDept").value;
+ if(!e)return;
+ document.getElementById("opEq").innerHTML=`<section class="card"><div class="title"><div><button class="btn secondary" onclick="renderOpEq()">← Back to Equipment</button><h1>${e?.name||r.equipmentId}</h1><p class="muted">${u} · ${d} · ${shiftLabel(document.getElementById("opShift").value)} · ${document.getElementById("opPoint").value}</p></div><span class="pill blue">${e.params.length} Parameters</span></div>
+ <div class="reading-list">${e.params.map(p=>`<div class="reading operator-reading"><div><b>${p[0]}</b><small>${p[4]==="text"?"Status / observation":"Normal "+p[2]+"–"+p[3]+" "+p[1]}</small></div><input type="${p[4]==="text"?"text":"number"}" step="any" data-type="${p[4]||"number"}" data-e="${e.id}" data-p="${p[0]}" data-unit="${p[1]}" data-min="${p[2]}" data-max="${p[3]}" oninput="checkVal(this)"><span class="pill green state">${p[4]==="text"?"Pending":"Normal"}</span></div>`).join("")}</div>
+ <div class="actions"><button class="btn primary" onclick="saveCurrentEquipment()">Save ${e?.name||r.equipmentId}</button><button class="btn secondary" onclick="renderOpEq()">Back</button><span id="equipmentSaved" class="success"></span></div></section>`;
+ window.currentOperatorEquipment=id;
+}
+function saveCurrentEquipment(){
+ const ins=[...document.querySelectorAll("[data-e]")].filter(x=>x.value!=="");
+ if(!ins.length){alert("Enter at least one reading.");return}
+ const d=getDB(),u=currentUser(),date=new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short"});
+ ins.forEach(i=>d.records.push({id:"r"+Date.now()+Math.random(),date,shift:document.getElementById("opShift").value,point:document.getElementById("opPoint").value,equipmentId:i.dataset.e,parameter:i.dataset.p,value:i.dataset.type==="text"?i.value:Number(i.value),unit:i.dataset.unit,status:getOperatorStatus(i.dataset.e),operator:u.name}));
+ saveDB(d);const msg=document.getElementById("equipmentSaved");if(msg)msg.textContent="✓ Equipment readings saved";
+ setTimeout(renderOpEq,700);
+}
+function checkVal(i){
+ const s=i.parentElement.querySelector(".state");
+ if(i.dataset.type==="text"){s.textContent=i.value?"Recorded":"Pending";s.className="pill "+(i.value?"green":"")+" state";return}
+ const v=Number(i.value);if(i.value!==""&&(v<i.dataset.min||v>i.dataset.max)){s.textContent="HIGH";s.className="pill red state"}else{s.textContent="Normal";s.className="pill green state"}
+}
+function meta(id){
+ const c=getCatalog();
+ let e=c.find(x=>x.id===id);
+ if(e)return e;
+ // Compatibility with demo/older records whose equipment IDs did not yet
+ // contain the unit suffix (for example "bfp-a" or "aph-a").
+ const base=String(id||"");
+ e=c.find(x=>x.id===base+"-u1") || c.find(x=>x.id===base+"-u2") || c.find(x=>x.id===base+"-u3");
+ return e;
+}
+function isBad(r){const e=meta(r.equipmentId),p=e?.params.find(x=>x[0]===r.parameter);return p&&p[4]!=="text"?Number(r.value)<p[2]||Number(r.value)>p[3]:false}
+
+function unitWorkspace(unit){
+ const d=getDB().records.filter(r=>meta(r.equipmentId)?.unit===unit);
+ const bad=d.filter(isBad).length;
+ const eqs=getCatalog().filter(e=>e.unit===unit);
+ document.getElementById("app").innerHTML=shell(`<div class="title"><div><h1>${unit} Workspace</h1><p class="muted">Only ${unit} equipment, history and trends are shown here.</p></div><div class="user">Engineer: ${currentUser()?.name||"Demo"}</div></div>
+ <div class="unit-tabs"><button class="unit-tab active">Overview</button><button class="unit-tab" onclick="unitHistory('${unit}')">History</button><button class="unit-tab" onclick="unitTrends('${unit}')">Trends</button><button class="unit-tab" onclick="unitEquipment('${unit}')">Equipment</button></div>
+ <div class="grid3"><div class="kpi"><small>Total Readings</small><strong>${d.length}</strong><span>${unit} shift readings</span></div><div class="kpi"><small>Normal</small><strong>${d.length-bad}</strong><span>Within range</span></div><div class="kpi"><small>Abnormal</small><strong class="danger">${bad}</strong><span>Outside range</span></div></div>
+ <section class="card"><div class="title"><div><h2>Equipment Overview</h2><p class="muted">All configured equipment belonging to ${unit}.</p></div></div><div class="eqgrid">${eqs.length?eqs.map(e=>{const rs=d.filter(r=>r.equipmentId===e.id),b=rs.filter(isBad).length;return `<div class="eq"><div class="eqhead"><div><h2>${e?.name||r.equipmentId}</h2><div class="muted">${e?.dept||"—"}</div></div><span class="pill ${b?"red":"green"}">${b?b+" Abnormal":"Normal"}</span></div><div class="muted">${e.params.length} parameters · ${rs.length} saved readings</div></div>`}).join(""):`<div class="empty">No equipment configured for ${unit}.</div>`}</div></section>
+ <section class="card"><div class="title"><div><h2>Recent ${unit} Readings</h2><p class="muted">Only ${unit} data is shown.</p></div></div><div class="table-wrap"><table><thead><tr><th>Date/Shift</th><th>Point</th><th>Department</th><th>Equipment</th><th>Parameter</th><th>Value</th><th>Status</th><th>Operator</th></tr></thead><tbody>${d.slice().reverse().slice(0,20).map(r=>{const e=meta(r.equipmentId),b=isBad(r);return `<tr class="${b?"badrow":""}"><td>${r.date}/${shiftLabel(r.shift)}</td><td>${r.point||"Shift Start"}</td><td>${e?.dept||"—"}</td><td>${e?.name||r.equipmentId}</td><td>${r.parameter}</td><td>${r.value} ${r.unit}</td><td><span class="pill ${b?"red":"green"}">${b?"HIGH":"Normal"}</span></td><td>${r.operator}</td></tr>`}).join("")||`<tr><td colspan="8" class="empty">No readings yet.</td></tr>`}</tbody></table></div></section>`,"unit"+unit.slice(-1));
+}
+function unitHistory(unit){
+ const d=getDB().records.filter(r=>meta(r.equipmentId)?.unit===unit).slice().reverse();
+ document.getElementById("app").innerHTML=shell(`<div class="title"><div><h1>${unit} — History</h1><p class="muted">Only ${unit} shift records.</p></div></div><div class="unit-tabs"><button class="unit-tab" onclick="unitWorkspace('${unit}')">Overview</button><button class="unit-tab active">History</button><button class="unit-tab" onclick="unitTrends('${unit}')">Trends</button><button class="unit-tab" onclick="unitEquipment('${unit}')">Equipment</button></div><section class="card"><div class="table-wrap"><table><thead><tr><th>Date/Shift</th><th>Point</th><th>Department</th><th>Equipment</th><th>Parameter</th><th>Value</th><th>Status</th><th>Operator</th></tr></thead><tbody>${d.map(r=>{const e=meta(r.equipmentId),b=isBad(r);return `<tr class="${b?"badrow":""}"><td>${r.date}/${shiftLabel(r.shift)}</td><td>${r.point||"Shift Start"}</td><td>${e?.dept||"—"}</td><td>${e?.name||r.equipmentId}</td><td>${r.parameter}</td><td>${r.value} ${r.unit}</td><td><span class="pill ${b?"red":"green"}">${b?"HIGH":"Normal"}</span></td><td>${r.operator}</td></tr>`}).join("")||`<tr><td colspan="8" class="empty">No history for ${unit}.</td></tr>`}</tbody></table></div></section>`,"unit"+unit.slice(-1));
+}
+function unitEquipment(unit){
+ const eqs=getCatalog().filter(e=>e.unit===unit);
+ document.getElementById("app").innerHTML=shell(`<div class="title"><div><h1>${unit} — Equipment</h1><p class="muted">Configure only equipment belonging to ${unit}.</p></div><button class="btn primary" onclick="addUnitEquipment('${unit}')">+ Add Equipment</button></div><div class="unit-tabs"><button class="unit-tab" onclick="unitWorkspace('${unit}')">Overview</button><button class="unit-tab" onclick="unitHistory('${unit}')">History</button><button class="unit-tab" onclick="unitTrends('${unit}')">Trends</button><button class="unit-tab active">Equipment</button></div><section class="card"><div class="table-wrap"><table><thead><tr><th>Department</th><th>Equipment</th><th>Parameters</th><th>Action</th></tr></thead><tbody>${eqs.map(e=>`<tr><td>${e?.dept||"—"}</td><td><b>${e?.name||r.equipmentId}</b></td><td>${e.params.length}</td><td><button class="btn secondary" onclick="editEquipment('${e.id}')">Edit</button></td></tr>`).join("")||`<tr><td colspan="4" class="empty">No equipment configured.</td></tr>`}</tbody></table></div></section>`,"unit"+unit.slice(-1));
+}
+function addUnitEquipment(unit){
+ const id="eq-"+Date.now();
+ equipmentEditor({id,unit,dept:"Turbine",name:"New Equipment",params:[]},true);
+}
+function unitTrends(unit){
+ const eqs=getCatalog().filter(e=>e.unit===unit);
+ document.getElementById("app").innerHTML=shell(`<div class="title"><div><h1>${unit} — Trends</h1><p class="muted">Trend charts are filtered to ${unit} only.</p></div></div><div class="unit-tabs"><button class="unit-tab" onclick="unitWorkspace('${unit}')">Overview</button><button class="unit-tab" onclick="unitHistory('${unit}')">History</button><button class="unit-tab active">Trends</button><button class="unit-tab" onclick="unitEquipment('${unit}')">Equipment</button></div><section class="card"><div class="grid3"><div><label>Department</label><select id="utDept" onchange="unitTrendOptions('${unit}')">${[...new Set(eqs.map(e=>e.dept))].map(x=>`<option>${x}</option>`).join("")}</select></div><div><label>Equipment</label><select id="utEq" onchange="unitTrendParams('${unit}')"></select></div><div><label>Parameter</label><select id="utParam" onchange="unitDrawTrend('${unit}')"></select></div></div></section><section class="card"><div class="charthead"><div><h2 id="uct">Trend</h2><p id="ucr" class="muted"></p></div><span id="ulatest" class="pill"></span></div><canvas id="ucanvas"></canvas></section><section class="card"><h2>History</h2><div class="table-wrap"><table><thead><tr><th>Date/Shift</th><th>Value</th><th>Status</th><th>Operator</th></tr></thead><tbody id="uhist"></tbody></table></div></section>`,"unit"+unit.slice(-1));
+ unitTrendOptions(unit);
+}
+function unitTrendOptions(unit){
+ const list=getCatalog().filter(e=>e.unit===unit&&e.dept===utDept.value);
+ utEq.innerHTML=list.length?list.map(e=>`<option value="${e.id}">${e?.name||r.equipmentId}</option>`).join(""):`<option value="">No equipment</option>`;
+ unitTrendParams(unit);
+}
+function unitTrendParams(unit){
+ const e=meta(utEq.value);
+ utParam.innerHTML=e?e.params.map((p,i)=>[p,i]).filter(([p])=>p[4]!=="text").map(([p,i])=>`<option value="${i}">${p[0]}</option>`).join("")||`<option value="">No numeric parameter</option>`:`<option value="">No parameter</option>`;
+ unitDrawTrend(unit);
+}
+function unitDrawTrend(unit){
+ const e=meta(utEq.value),p=e?.params[Number(utParam.value)],c=document.getElementById("ucanvas"),ctx=c?.getContext("2d");
+ if(!c||!ctx||!e||!p)return;
+ const dpr=devicePixelRatio||1,w=c.clientWidth||800,h=330;c.width=w*dpr;c.height=h*dpr;ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);
+ const data=getDB().records.filter(r=>meta(r.equipmentId)?.unit===unit&&r.equipmentId===e.id&&r.parameter===p[0]);
+ uct.textContent=`${e?.name||r.equipmentId} — ${p[0]}`;ucr.textContent=`Normal range: ${p[2]}–${p[3]} ${p[1]}`;
+ if(!data.length){ulatest.textContent="No data";uhist.innerHTML='<tr><td colspan="4" class="empty">No saved readings.</td></tr>';return}
+ const vals=data.map(x=>x.value),lo=Math.min(p[2],...vals),hi=Math.max(p[3],...vals),pad={l:48,r:20,t:20,b:42},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b,ymin=lo-(hi-lo||1)*.15,ymax=hi+(hi-lo||1)*.15,X=i=>data.length===1?pad.l+pw/2:pad.l+i*pw/(data.length-1),Y=v=>pad.t+(ymax-v)*ph/(ymax-ymin);
+ ctx.strokeStyle="#e5e7eb";for(let i=0;i<5;i++){let y=pad.t+i*ph/4;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();ctx.fillStyle="#667085";ctx.font="11px Arial";ctx.fillText((ymax-(ymax-ymin)*i/4).toFixed(1),5,y+4)}
+ ctx.strokeStyle="#b42318";ctx.setLineDash([5,4]);[p[2],p[3]].forEach(v=>{let y=Y(v);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke()});ctx.setLineDash([]);
+ ctx.strokeStyle="#1f6feb";ctx.lineWidth=3;ctx.beginPath();data.forEach((r,i)=>i?ctx.lineTo(X(i),Y(r.value)):ctx.moveTo(X(i),Y(r.value)));ctx.stroke();
+ data.forEach((r,i)=>{let bad=isBad(r);ctx.fillStyle=bad?"#b42318":"#1f6feb";ctx.beginPath();ctx.arc(X(i),Y(r.value),5,0,Math.PI*2);ctx.fill();ctx.fillStyle="#667085";ctx.font="10px Arial";ctx.fillText(r.date+" "+shiftLabel(r.shift),X(i)-18,h-13)});
+ const last=data[data.length-1],bad=isBad(last);ulatest.textContent=`Latest: ${last.value} ${p[1]} — ${bad?"HIGH":"Normal"}`;ulatest.className="pill "+(bad?"red":"green");
+ uhist.innerHTML=data.slice().reverse().map(r=>`<tr class="${isBad(r)?"badrow":""}"><td>${r.date}/${shiftLabel(r.shift)}</td><td>${r.value} ${p[1]}</td><td><span class="pill ${isBad(r)?"red":"green"}">${isBad(r)?"HIGH":"Normal"}</span></td><td>${r.operator}</td></tr>`).join("");
+}
+function dashboard(){
+ const d=getDB().records;let bad=d.filter(isBad).length;
+ document.getElementById("app").innerHTML=shell(`<div class="title"><div><h1>Engineer Dashboard</h1><p class="muted">Current view of operator-entered readings.</p></div><div class="user">Engineer: ${currentUser()?.name||"Demo"}</div></div>
+ <div class="grid3"><div class="kpi"><small>Total Readings</small><strong>${d.length}</strong><span>Saved shift readings</span></div><div class="kpi"><small>Normal</small><strong>${d.length-bad}</strong><span>Within range</span></div><div class="kpi"><small>Abnormal</small><strong class="danger">${bad}</strong><span>Outside range</span></div></div>
+ <section class="card"><div class="title"><div><h2>Unit Overview</h2><p class="muted">Latest recorded status by unit.</p></div></div><div class="grid3">${["Unit 1","Unit 2","Unit 3"].map(u=>{const rs=d.filter(r=>meta(r.equipmentId)?.unit===u);const b=rs.filter(isBad).length;return `<div class="eq"><div class="eqhead"><div><h2>${u}</h2><div class="muted">${rs.length} readings</div></div><span class="pill ${b?"red":"green"}">${b?b+" Abnormal":"Normal"}</span></div></div>`}).join("")}</div></section>
+ <section class="card"><div class="title"><div><h2>Recent Readings</h2><p class="muted">Abnormal readings are highlighted automatically.</p></div></div><div class="table-wrap"><table><thead><tr><th>Date/Shift</th><th>Point</th><th>Unit</th><th>Equipment</th><th>Parameter</th><th>Value</th><th>Status</th><th>Operator</th></tr></thead><tbody>${d.slice().reverse().slice(0,30).map(r=>{const e=meta(r.equipmentId),b=isBad(r);return `<tr class="${b?"badrow":""}"><td>${r.date} / ${shiftLabel(r.shift)}</td><td>${r.point||"Shift Start"}</td><td>${e?.unit||"—"}</td><td>${e?.name||r.equipmentId}</td><td>${r.parameter}</td><td><b>${r.value} ${r.unit}</b></td><td><span class="pill ${b?"red":"green"}">${b?"HIGH":"Normal"}</span></td><td>${r.operator}</td></tr>`}).join("")}</tbody></table></div></section>`,"dashboard")
+}
+function historyPage(){
+ const d=getDB().records.slice().reverse();
+ document.getElementById("app").innerHTML=shell(`<div class="title"><div><h1>Shift History</h1><p class="muted">All submitted operator readings.</p></div></div><section class="card"><div class="table-wrap"><table><thead><tr><th>Date/Shift</th><th>Point</th><th>Unit</th><th>Department</th><th>Equipment</th><th>Parameter</th><th>Value</th><th>Status</th><th>Operator</th></tr></thead><tbody>${d.map(r=>{const e=meta(r.equipmentId),b=isBad(r);return `<tr class="${b?"badrow":""}"><td>${r.date}/${shiftLabel(r.shift)}</td><td>${r.point||"Shift Start"}</td><td>${e?.unit||"—"}</td><td>${e?.dept||"—"}</td><td>${e?.name||r.equipmentId}</td><td>${r.parameter}</td><td>${r.value} ${r.unit}</td><td><span class="pill ${b?"red":"green"}">${b?"HIGH":"Normal"}</span></td><td>${r.operator}</td></tr>`}).join("")}</tbody></table></div></section>`,"history")
+}
+function trendPage(){
+ const all=getCatalog().map(e=>e.params.map(p=>({e,p}))).flat();document.getElementById("app").innerHTML=shell(`<div class="title"><div><h1>Equipment Trends</h1><p class="muted">Select a parameter to see its shift history.</p></div></div>
+ <section class="card"><div class="grid4"><div><label>Unit</label><select id="trUnit" onchange="trendOptions()"><option>Unit 1</option><option selected>Unit 2</option><option>Unit 3</option></select></div><div><label>Department</label><select id="trDept" onchange="trendOptions()"><option>Turbine</option><option>Boiler O'Meter</option><option>Firing Floor</option></select></div><div><label>Equipment</label><select id="trEq" onchange="trendParams()"></select></div><div><label>Parameter</label><select id="trParam" onchange="draw()"></select></div></div></section>
+ <section class="card"><div class="charthead"><div><h2 id="ct">Trend</h2><p id="cr" class="muted"></p></div><span id="latest" class="pill"></span></div><canvas id="canvas"></canvas></section>
+ <section class="card"><h2>History</h2><div class="table-wrap"><table><thead><tr><th>Date/Shift</th><th>Value</th><th>Status</th><th>Operator</th></tr></thead><tbody id="hist"></tbody></table></div></section>`,"trend");
+ trendOptions()
+}
+function trendOptions(){const l=getCatalog().filter(e=>e.unit===trUnit.value&&e.dept===trDept.value);trEq.innerHTML=l.length?l.map((e,i)=>`<option value="${e.id}">${e?.name||r.equipmentId}</option>`).join(""):`<option value="">No equipment</option>`;trendParams()}
+function trendParams(){const e=meta(trEq.value);trParam.innerHTML=e?e.params.map((p,i)=>[p,i]).filter(([p])=>p[4]!=="text").map(([p,i])=>`<option value="${i}">${p[0]}</option>`).join("")||`<option value="">No numeric parameter</option>`:`<option value="">No parameter</option>`;draw()}
+function draw(){
+ const e=meta(trEq.value),p=e?.params[Number(trParam.value)],c=document.getElementById("canvas"),ctx=c.getContext("2d");if(!e||!p){ct.textContent="No data";return}
+ const dpr=devicePixelRatio||1,w=c.clientWidth||800,h=330;c.width=w*dpr;c.height=h*dpr;ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);
+ const data=getDB().records.filter(r=>r.equipmentId===e.id&&r.parameter===p[0]);ct.textContent=`${e?.name||r.equipmentId} — ${p[0]}`;cr.textContent=`Normal range: ${p[2]}–${p[3]} ${p[1]}`;
+ if(!data.length){latest.textContent="No data";hist.innerHTML='<tr><td colspan="4" class="empty">No saved readings.</td></tr>';return}
+ const vals=data.map(x=>x.value),lo=Math.min(p[2],...vals),hi=Math.max(p[3],...vals),pad={l:48,r:20,t:20,b:42},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;
+ const ymin=lo-(hi-lo||1)*.15,ymax=hi+(hi-lo||1)*.15,X=i=>data.length===1?pad.l+pw/2:pad.l+i*pw/(data.length-1),Y=v=>pad.t+(ymax-v)*ph/(ymax-ymin);
+ ctx.strokeStyle="#e5e7eb";for(let i=0;i<5;i++){let y=pad.t+i*ph/4;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();ctx.fillStyle="#667085";ctx.font="11px Arial";ctx.fillText((ymax-(ymax-ymin)*i/4).toFixed(1),5,y+4)}
+ ctx.strokeStyle="#b42318";ctx.setLineDash([5,4]);[p[2],p[3]].forEach(v=>{let y=Y(v);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke()});ctx.setLineDash([]);
+ ctx.strokeStyle="#1f6feb";ctx.lineWidth=3;ctx.beginPath();data.forEach((r,i)=>i?ctx.lineTo(X(i),Y(r.value)):ctx.moveTo(X(i),Y(r.value)));ctx.stroke();
+ data.forEach((r,i)=>{let bad=isBad(r);ctx.fillStyle=bad?"#b42318":"#1f6feb";ctx.beginPath();ctx.arc(X(i),Y(r.value),5,0,Math.PI*2);ctx.fill();ctx.fillStyle="#667085";ctx.font="10px Arial";ctx.fillText(r.date+" "+shiftLabel(r.shift),X(i)-18,h-13)});
+ const last=data[data.length-1],lb=isBad(last);latest.textContent=`Latest: ${last.value} ${p[1]} — ${lb?"HIGH":"Normal"}`;latest.className="pill "+(lb?"red":"green");
+ hist.innerHTML=data.slice().reverse().map(r=>`<tr class="${isBad(r)?"badrow":""}"><td>${r.date} / ${shiftLabel(r.shift)}</td><td>${r.value} ${p[1]}</td><td><span class="pill ${isBad(r)?"red":"green"}">${isBad(r)?"HIGH":"Normal"}</span></td><td>${r.operator}</td></tr>`).join("")
+}
+function seedDemo(){getDB()}
+const u=currentUser();if(!u)renderLogin();else u.role==="operator"?operator():dashboard();seedDemo();window.addEventListener("resize",()=>document.getElementById("canvas")&&draw());
+
+window.__ntpcStarted = true;
+</script>
+</body>
+</html>
